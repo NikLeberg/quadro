@@ -1,0 +1,15 @@
+{
+    "name": "ultrasonicAttiny",
+    "keywords": "I2C, bus, sensor, ultrasonic, distance",
+    "description": "Bibliothek um ein Ultraschallsensor bestückt mit Attiny-I2C-Interface zu kommunizieren.",
+    "authors":
+    {
+        "name": "Niklaus Leuenberger"
+    },
+    "version": "0.1",
+    "export": {
+        "include": "src"
+    },
+    "frameworks": "arduino",
+    "platforms": "espressif32"
+}
