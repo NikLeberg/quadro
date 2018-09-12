@@ -4,7 +4,7 @@
 *
 * Liest und schreibt die Konfiguration aus einer Konfigurations-Datei.
 * @author  Niklaus R. Leuenberger
-* @date    10/07/2018
+* @date    22/07/2018
 */
 
 #ifndef config_H
@@ -16,17 +16,19 @@
 /** Speicherpfad der Konfigurations-Datei*/
 #define CONF_FILE "/config.bin"
 /** Anzahl an Variablen in vars-Array*/
-#define CONF_NUM 39
+#define CONF_NUM 38
 
 ///
 /// Fehlercodes
 ///
 /** Kein Fehler */
 #define ERR_NO_ERR 0
+/** Dateisystem konnte nicht formartiert werden */
+#define ERR_CF_FORMAT 1
 /** Dateisystem beschädigt */
-#define ERR_CF_FS 1
+#define ERR_CF_FS 2
 /** Datei beschädigt */
-#define ERR_CF_FILE 2
+#define ERR_CF_FILE 3
 
 ///
 /// Includes
@@ -35,13 +37,78 @@
 #include <SPIFFS.h>
 
 /// Klasse
-class config {
+class configClass {
   public:
-    config();
+    configClass() : vars {
+      // Yaw-Regler
+      {{'y','a','w','E','n'}, false, false},
+      {{'y','a','w','K','p'}, false, 0.0f},
+      {{'y','a','w','K','i'}, false, 0.0f},
+      {{'y','a','w','K','d'}, false, 0.0f},
+      {{'y','a','w','O','f','f'}, false, (int16_t)0},
+      // Pitch-Regler
+      {{'p','i','t','c','h','E','n'}, false, false},
+      {{'p','i','t','c','h','K','p'}, false, 0.0f},
+      {{'p','i','t','c','h','K','i'}, false, 0.0f},
+      {{'p','i','t','c','h','K','d'}, false, 0.0f},
+      {{'p','i','t','c','h','O','f','f'}, false, (int16_t)0},
+      // Roll-Regler
+      {{'r','o','l','l','E','n'}, false, false},
+      {{'r','o','l','l','K','p'}, false, 0.0f},
+      {{'r','o','l','l','K','i'}, false, 0.0f},
+      {{'r','o','l','l','K','d'}, false, 0.0f},
+      {{'r','o','l','l','O','f','f'}, false, (int16_t)0},
+      // Kalibrationsprofil BNO055
+      {{'c','a','l','A','c','c','X'}, true, (int16_t)10},
+      {{'c','a','l','A','c','c','Y'}, true, (int16_t)-29},
+      {{'c','a','l','A','c','c','Z'}, true, (int16_t)12},
+      {{'c','a','l','M','a','g','X'}, true, (int16_t)-481},
+      {{'c','a','l','M','a','g','Y'}, true, (int16_t)-45},
+      {{'c','a','l','M','a','g','Z'}, true, (int16_t)-263},
+      {{'c','a','l','G','y','r','X'}, true, (int16_t)0},
+      {{'c','a','l','G','y','r','Y'}, true, (int16_t)0},
+      {{'c','a','l','G','y','r','Z'}, true, (int16_t)0},
+      {{'c','a','l','A','c','c','R','a','d'}, true, (int16_t)1000},
+      {{'c','a','l','M','a','g','R','a','d'}, true, (int16_t)845},
+      // Maximalwerte der Roll- und Pitch-Achsen
+      {{'a','x','i','s','M','a','x'}, false, (int16_t)450},
+      // Update Rate in Hz des schnellen Loops
+      {{'f','a','s','t','L','o','o','p'}, false, (uint16_t)100},
+      // Steuerintensität
+      {{'i','n','t','Y','a','w'}, false, 1.0f},
+      {{'i','n','t','R','o','l','l'}, false, 1.0f},
+      {{'i','n','t','P','i','t','c','h'}, false, 1.0f},
+      {{'i','n','t','T','h','r'}, false, 1.0f},
+      // Throttle Modus. (0 = Relativ, 1 = Absolut)
+      {{'a','b','s','T','h','r'}, false, true},
+      // Aktivierte Flugmodi
+      {{'a','l','l','o','w','H','o','v'}, false, false},
+      {{'a','l','l','o','w','M','a','n'}, false, true},
+      {{'a','l','l','o','w','S','u','p'}, false, false},
+      {{'a','l','l','o','w','A','u','t','o'}, false, false},
+      {{'a','l','l','o','w','F','u','l','l'}, false, false}
+    } {};
 
     static const uint8_t num = CONF_NUM;
     struct configVariable {
-      char name[10];   // Variablenname
+      configVariable(std::array<char, 10> newName, bool newHide, bool newValue) :
+        name(newName), type(0), hide(newHide), b(newValue) {};
+      configVariable(std::array<char, 10> newName, bool newHide, uint8_t newValue) :
+        name(newName), type(1), hide(newHide), ui8(newValue) {};
+      configVariable(std::array<char, 10> newName, bool newHide, uint16_t newValue) :
+        name(newName), type(2), hide(newHide), ui16(newValue) {};
+      configVariable(std::array<char, 10> newName, bool newHide, uint32_t newValue) :
+        name(newName), type(3), hide(newHide), ui32(newValue) {};
+      configVariable(std::array<char, 10> newName, bool newHide, int8_t newValue) :
+        name(newName), type(4), hide(newHide), i8(newValue) {};
+      configVariable(std::array<char, 10> newName, bool newHide, int16_t newValue) :
+        name(newName), type(5), hide(newHide), i16(newValue) {};
+      configVariable(std::array<char, 10> newName, bool newHide, int32_t newValue) :
+        name(newName), type(6), hide(newHide), i32(newValue) {};
+      configVariable(std::array<char, 10> newName, bool newHide, float newValue) :
+        name(newName), type(7), hide(newHide), f(newValue) {};
+
+      std::array<char, 10> name; // Variablenname
       uint8_t     type;       // Datentyp
       bool        hide;       // Sichtbar auf Website?
       union {                 // Geteilter Datenspeicher
@@ -54,67 +121,17 @@ class config {
         int32_t   i32;        // 6: -2'147'483'647 - +2'147'483'648
         float     f;          // 7: -Infinity - +Infinity
       };
-
     };
+
     uint8_t         setup();
 
     uint8_t         read();
     uint8_t         write();
     void            format(uint8_t name, String var);
-    configVariable* get(String name);
+    configVariable* get(String name, bool &null, uint8_t *index = NULL);
     bool            del();
-    void            setDefault();
 
-    struct configVariable vars[CONF_NUM] = {
-      // Yaw-Regler
-      {name : "yawEn", type : 0, hide : false, {.b = false}},
-      {name : "yawKp", type : 7, hide : false, {.f = 0.0f}},
-      {name : "yawKi", type : 7, hide : false, {.f = 0.0f}},
-      {name : "yawKd", type : 7, hide : false, {.f = 0.0f}},
-      {name : "yawOff", type : 7, hide : false, {.f = 0.0f}},
-      // Pitch-Regler
-      {name : "pitchEn", type : 0, hide : false, {.b = false}},
-      {name : "pitchKp", type : 7, hide : false, {.f = 0.0f}},
-      {name : "pitchKi", type : 7, hide : false, {.f = 0.0f}},
-      {name : "pitchKd", type : 7, hide : false, {.f = 0.0f}},
-      {name : "pitchOff", type : 7, hide : false, {.f = 0.0f}},
-      // Roll-Regler
-      {name : "rollEn", type : 0, hide : false, {.b = false}},
-      {name : "rollKp", type : 7, hide : false, {.f = 0.0f}},
-      {name : "rollKi", type : 7, hide : false, {.f = 0.0f}},
-      {name : "rollKd", type : 7, hide : false, {.f = 0.0f}},
-      {name : "rollOff", type : 7, hide : false, {.f = 0.0f}},
-      // Kalibrationsprofil BNO055
-      {name : "calAccX", type : 5, hide : true, {.i16 = 10}},
-      {name : "calAccY", type : 5, hide : true, {.i16 = -29}},
-      {name : "calAccZ", type : 5, hide : true, {.i16 = 12}},
-      {name : "calMagX", type : 5, hide : true, {.i16 = -481}},
-      {name : "calMagY", type : 5, hide : true, {.i16 = -45}},
-      {name : "calMagZ", type : 5, hide : true, {.i16 = -263}},
-      {name : "calGyrX", type : 5, hide : true, {.i16 = 0}},
-      {name : "calGyrY", type : 5, hide : true, {.i16 = 0}},
-      {name : "calGyrZ", type : 5, hide : true, {.i16 = 0}},
-      {name : "calAccRad", type : 5, hide : true, {.i16 = 1000}},
-      {name : "calMagRad", type : 5, hide : true, {.i16 = 845}},
-      // Maximalwerte der Roll- und Pitch-Achsen
-      {name : "pitchMax", type : 7, hide : false, {.f = 60.0f}},
-      {name : "rollMax", type : 7, hide : false, {.f = 60.0f}},
-      // System Clock resp. Update-Intervall in us
-      {name : "sysUpdate", type : 3, hide : false, {.ui32 = 50000}},
-      // Steuerintensität
-      {name : "intYaw", type : 7, hide : false, {.f = 1.0f}},
-      {name : "intRoll", type : 7, hide : false, {.f = 1.0f}},
-      {name : "intPitch", type : 7, hide : false, {.f = 1.0f}},
-      {name : "intThr", type : 7, hide : false, {.f = 1.0f}},
-      // Throttle Modus. (0 = Relativ, 1 = Absolut)
-      {name : "absThr", type : 0, hide : false, {.b = true}},
-      // Aktivierte Flugmodi
-      {name : "allowHov", type : 0, hide : false, {.b = false}},
-      {name : "allowMan", type : 0, hide : false, {.b = true}},
-      {name : "allowSup", type : 0, hide : false, {.b = false}},
-      {name : "allowAuto", type : 0, hide : false, {.b = false}},
-      {name : "allowFull", type : 0, hide : false, {.b = false}}
-    };
+    struct configVariable vars[CONF_NUM];
 
   private:
     // Keine
