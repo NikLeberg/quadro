@@ -1,0 +1,22 @@
+{
+    "name": "BME280",
+    "keywords": "I2C, bus, sensor, temperature, pressure",
+    "description": "Bibliothek um mit dem Bosch Sensortec BME280 Umgebungssensor zu kommunizieren.",
+    "authors":
+    {
+        "name": "Niklaus Leuenberger"
+    },
+    "version": "0.2",
+    "export": {
+        "include": "src"
+    },
+    "frameworks": "arduino",
+    "platforms": "espressif32",
+    "dependencies":
+        [
+            {
+                "name": "Wire",
+                "version": ">=1.0"
+            }
+        ]
+}

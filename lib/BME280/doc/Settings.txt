@@ -1,0 +1,14 @@
+Table 10: Settings and performance for gaming
+Suggested settings for gaming
+Sensor mode normal mode, tstandby = 0.5 ms
+Oversampling settings pressure ×4, temperature ×1, humidity ×0
+IIR filter settings filter coefficient 16
+Performance for suggested settings
+Current consumption 581 µA
+RMS Noise 0.3 Pa / 2.5 cm
+Data output rate 83 Hz
+Filter bandwidth 1.75 Hz
+Response time (75%) 0.3 s
+
+I2C - Adress : 0x77
+Chip id: 0x60
