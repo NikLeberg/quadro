@@ -1,6 +1,6 @@
 /*
-  ultrasonic.hpp v0.1 - Bibliothek um ein Ultraschallsensor auzuwerten.
-  Erstellt von Niklaus R. Leuenberger, August 20, 2018.
+  ultrasonic.hpp v0.1 - Bibliothek um ein Ultraschallsensor interruptgesteurt auzuwerten.
+  Erstellt von Niklaus R. Leuenberger, September 12, 2018.
 */
 
 #ifndef ULTRASONIC_h

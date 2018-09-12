@@ -74,7 +74,7 @@ bool comm::i2c::writeByte(uint8_t dev, uint8_t reg, uint8_t data) {
 }
 
 /**
-* @brief  Befreite Bus
+* @brief  Befreie Bus
 *
 * Befreit Bus manuell falls nach einem Neustart ein Slave die Datenleitung
 * low hält.

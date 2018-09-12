@@ -1,6 +1,6 @@
 /*
-  ultrasonic.cpp v0.1 - Bibliothek um ein Ultraschallsensor auzuwerten.
-  Erstellt von Niklaus R. Leuenberger, August 20, 2018.
+  ultrasonic.cpp v0.1 - Bibliothek um ein Ultraschallsensor interruptgesteurt auzuwerten.
+  Erstellt von Niklaus R. Leuenberger, September 12, 2018.
 */
 
 #include "ultrasonic.hpp"
@@ -37,15 +37,12 @@ bool ultrasonic::setup() {
 // Starte Aktualisierung
 bool ultrasonic::update() {
   if (_finished) {
-    Serial.print("u");
     attachInterrupt(digitalPinToInterrupt(_echoPin), _interrupt, CHANGE);
     digitalWrite(_triggerPin, LOW);
     _finished = false;
     _timeout = micros();
   } else {
-    Serial.print("_");
     if (micros() - _timeout > 20000) {
-      Serial.print("t");
       digitalWrite(_triggerPin, HIGH);
       detachInterrupt(_echoPin);
       _finished = true;
