@@ -4,7 +4,7 @@
 *
 * Steuert einen einzelnen Motor an.
 * @author  Niklaus R. Leuenberger
-* @date    15/07/2018
+* @date    20/08/2018
 */
 
 #include "motor.hpp"
@@ -16,7 +16,7 @@
 * @return bool true bei Fehler, sonst false
 */
 bool motor::setup() {
-  if (_m.attach(_pin)) return true;
+  if (!_m.attach(_pin)) return true;
   _m.writeMicroseconds(_mOff);
   return false;
 }
