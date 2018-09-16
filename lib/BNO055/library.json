@@ -1,0 +1,22 @@
+{
+    "name": "BNO055",
+    "keywords": "9DOF, I2C, bus, sensor, orientation, acceleration",
+    "description": "Bibliothek um mit dem Bosch Sensortec BNO055 9-Achsen-Sensor zu kommunizieren.",
+    "authors":
+    {
+        "name": "Niklaus Leuenberger"
+    },
+    "version": "0.6",
+    "export": {
+        "include": "src"
+    },
+    "frameworks": "arduino",
+    "platforms": "espressif32",
+    "dependencies":
+        [
+            {
+                "name": "Wire",
+                "version": ">=1.0"
+            }
+        ]
+}
